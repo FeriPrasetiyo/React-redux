@@ -5,7 +5,7 @@ const request = axios.create({
 
 const loadUserSuccess = (data) => ({
     type: 'LOAD_USER_SUCCESS',
-    data
+    data,
 })
 
 const loadUserFailure = () => ({
@@ -106,10 +106,9 @@ export const updateUser = ({ id, name, phone }) => dispatch => {
     })
 }
 
-export const loadmoreUserSuccess = (id, user) => ({
+export const loadmoreUserSuccess = (data) => ({
     type: 'LOADMORE_USER_SUCCESS',
-    id,
-    user
+    data,
 })
 
 export const loadmoreUserFailure = () => ({
@@ -117,31 +116,55 @@ export const loadmoreUserFailure = () => ({
 })
 
 export const loadmoreUser = () => async (dispatch, getSate) => {
-    const params = getSate().phoneBook.params
-    console.log(params)
+    const state = getSate()
     try {
-        if (params.page < params.pages) {
-            await dispatch(loadmoreUserSuccess())
-            dispatch(loadUser())
+        if (state.phoneBook.params.page < state.phoneBook.params.pages) {
+            let params = {
+                ...state.phoneBook.params,
+                page: Number(state.phoneBook.params.page + 1)
+            }
+            request.get('users', { params: params }).then((res) => {
+                params = {
+                    ...params,
+                    pages: res.data.data[0].pages
+                }
+                dispatch(loadmoreUserSuccess({ users: res.data.data[0].users, params }))
+            }).catch((err) => {
+                console.log(err)
+            })
         }
     } catch (err) {
         dispatch(loadmoreUserFailure())
     }
 }
 
-export const searchUserSuccess = (query) => ({
+export const searchUserSuccess = (data) => ({
     type: 'SEARCH_USER_SUCCESS',
-    query,
+    data,
 })
 
 export const searchUserFailure = () => ({
     type: 'SEARCH_USER_FAILURE',
 })
 
-export const searchUser = (query) => async (dispatch) => {
+export const searchUser = (query) => async (dispatch, getSate) => {
     try {
-        await dispatch(searchUserSuccess(query))
-        dispatch(loadUser())
+        let state = getSate()
+        let params = {
+            ...state.params,
+            ...query,
+            page: 1
+        }
+        console.log(params, 'ini params')
+        request.get('users', { params }).then((res) => {
+            params = {
+                ...params,
+                pages: res.data.data[0].pages
+            }
+            dispatch(searchUserSuccess({ users: res.data.data[0].users, params }))
+        }).catch((err) => {
+            console.log(err)
+        })
     } catch (err) {
         dispatch(searchUserFailure())
     }

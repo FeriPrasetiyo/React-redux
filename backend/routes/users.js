@@ -9,7 +9,6 @@ const e = require('express');
 router.get('/', async function (req, res, next) {
   try {
     const { name, phone, page } = req.query
-
     const Op = Sequelize.Op;
 
     const params = []

@@ -3,7 +3,6 @@ const getdata = {
     params: {
         page: 1,
         pages: 1,
-        name: ''
     }
 }
 
@@ -59,12 +58,9 @@ const users = (state = getdata, action) => {
                     })
             }
         case 'RESEND_USER_SUCCESS':
-            console.log(action, 'action')
             return {
                 ...state,
                 users: state.users.map(item => {
-                    console.log(item.id, 'item id')
-                    console.log(action.id, 'action ic')
                     if (item.id === action.id) {
                         item.id = action.user.id
                         item.sent = true
@@ -101,11 +97,11 @@ const users = (state = getdata, action) => {
             }
         case 'LOADMORE_USER_SUCCESS':
             return {
-                ...state,
-                params: {
-                    ...state.params,
-                    page: state.params.page + 1
-                }
+                users: [...state.users, ...action.data.users.map(item => {
+                    item.sent = true
+                    return item
+                })],
+                params: action.data.params
             }
         case 'REMOVE_USER_SUCCESS':
             return {
@@ -113,10 +109,12 @@ const users = (state = getdata, action) => {
                 users: state.users.filter(item => item.id !== action.id)
             }
         case 'SEARCH_USER_SUCCESS':
-            console.log(action.query, 'qery')
             return {
-                ...state,
-                params: { ...state.params, ...action.query, page: 1 }
+                users: action.data.users.map(item => {
+                    item.sent = true
+                    return item
+                }),
+                params: action.data.params
             }
         case 'SEARCH_USER_FAILURE':
         case 'LOADMORE_USER_FAILURE':

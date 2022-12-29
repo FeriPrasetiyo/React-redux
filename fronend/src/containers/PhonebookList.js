@@ -12,6 +12,7 @@ class PhonebookList extends Component {
         var element = event.target;
         if (element.scrollHeight - element.scrollTop === element.clientHeight) {
             this.props.loadmore()
+            console.log('masuk')
         }
     }
     render() {
